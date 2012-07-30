@@ -1,9 +1,10 @@
 typedef struct
 {
     cl_platform_id      platform;
-    cl_int              n_devices;
+    cl_uint             n_devices;
     cl_device_id        *devices;
     int                 device_id;
+    size_t              max_work_size;
     cl_context          context;
     cl_command_queue    queue;
 } cl_vars;

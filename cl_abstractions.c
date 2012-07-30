@@ -72,6 +72,13 @@ void cl_initialise(cl_vars *cl)
         exit(EXIT_SUCCESS);
     }
 
+    // Retrieve the max work group size
+    err_ret = clGetDeviceInfo(cl->devices[cl->device_id],
+        CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(cl->max_work_size),
+        &cl->max_work_size, NULL);
+    check_error(__FILE__, __LINE__, err_ret);
+    fprintf(stderr, "CL_DEVICE_MAX_WORK_GROUP_SIZE = %d\n", cl->max_work_size);
+
     // Create a context 
     cl->context = clCreateContext(NULL, cl->n_devices, cl->devices, NULL,
         NULL, &err_ret);

@@ -36,7 +36,7 @@ void convert_module(ga_settings *settings, cl_vars *cl, cl_mem dev_input,
     size_t  local_work_size[1];
 
     // Set work size
-    int nt = settings->spc < 512 ? settings->spc : 512;
+    int nt = MIN(settings->spc, cl->max_work_size);
     global_work_size[0] = settings->spc;
     local_work_size[0] = nt;
 

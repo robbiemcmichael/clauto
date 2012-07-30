@@ -33,7 +33,7 @@ void zero_spectrum(ga_settings *settings, cl_vars *cl, cl_mem dev_spectrum)
     size_t  local_work_size[1];
 
     // Set work size
-    int nt = settings->output_length < 512 ? settings->output_length : 512;
+    int nt = MIN(settings->output_length, cl->max_work_size);
     global_work_size[0] = settings->output_length;
     local_work_size[0] = nt;
 
@@ -57,7 +57,7 @@ void add_spectrum(ga_settings *settings, cl_vars *cl, cl_mem dev_a,
     size_t  local_work_size[1];
 
     // Set work size
-    int nt = settings->output_length < 512 ? settings->output_length : 512;
+    int nt = MIN(settings->output_length, cl->max_work_size);
     global_work_size[0] = settings->output_length;
     local_work_size[0] = nt;
 

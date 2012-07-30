@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     // Create device memory objects
     cl_mem dev_input = clCreateBuffer(cl->context, CL_MEM_READ_ONLY,
-        settings->bytes, host_input, &err_ret);
+        settings->bytes, NULL, &err_ret);
     check_error(__FILE__, __LINE__, err_ret);
     cl_mem dev_data = clCreateBuffer(cl->context, CL_MEM_READ_WRITE,
         settings->n*sizeof(cl_float2), NULL, &err_ret);

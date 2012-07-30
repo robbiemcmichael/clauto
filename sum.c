@@ -39,7 +39,7 @@ void sum_module(ga_settings *settings, cl_vars *cl, cl_mem dev_data,
     size_t  local_work_size[1];
 
     // Set work size
-    int nt = settings->n < 512 ? settings->n : 512;
+    int nt = MIN(settings->n, cl->max_work_size);
     global_work_size[0] = settings->n;
     local_work_size[0] = nt;
 
@@ -65,7 +65,7 @@ void sum_module(ga_settings *settings, cl_vars *cl, cl_mem dev_data,
     {
         // Recalculate the work size and number of threads
         length /= 2;
-        nt = length < 512 ? length : 512;
+        nt = MIN(length, cl->max_work_size);
 
         // Set work size
         global_work_size[0] = length;
@@ -99,7 +99,7 @@ void sum_module(ga_settings *settings, cl_vars *cl, cl_mem dev_data,
     }
 
     // Set work size
-    nt = settings->output_length < 512 ? settings->output_length : 512;
+    nt = MIN(settings->output_length, cl->max_work_size);
     global_work_size[0] = settings->output_length;
     local_work_size[0] = nt;
 

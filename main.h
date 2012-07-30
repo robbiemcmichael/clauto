@@ -3,6 +3,8 @@
 #define INPUT_FILE      2
 #define INPUT_NETWORK   3
 
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
 typedef struct
 {
     int     device_id;      // OpenCL device id
