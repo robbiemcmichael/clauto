@@ -3,6 +3,9 @@
 #define INPUT_FILE      2
 #define INPUT_NETWORK   3
 
+#define ENC_VLBA    0
+#define ENC_AT      1
+
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 typedef struct
@@ -15,6 +18,7 @@ typedef struct
     int     n;              // Total number of samples per loop
     int     spc;            // Samples per channel
     int     bps;            // Bits per sample
+    int     encoding;       // Encoding scheme
     int     channels;       // Number of channels
     int     bytes;          // Number of bytes
     int     batch_size;     // FFT batch size

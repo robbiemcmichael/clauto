@@ -31,12 +31,14 @@ void options(int argc, char *argv[], ga_settings *settings)
             {"batchsize", required_argument, NULL, 'b'},
             {"resolution", required_argument, NULL, 'r'},
             {"loops", required_argument, NULL, 'g'},
+            {"encoding", required_argument, NULL, 'e'},
             {"channels", required_argument, NULL, 'c'},
             {NULL, 0, NULL, 0}
         };
 
         int option_index = 0;
-        c = getopt_long(argc, argv, "d:p:a:b:r:g:c:", long_options, &option_index);
+        c = getopt_long(argc, argv, "d:p:a:b:r:g:e:c:", long_options,
+            &option_index);
 
         // No more options, exit the loop
         if (c == -1)
@@ -54,7 +56,8 @@ void options(int argc, char *argv[], ga_settings *settings)
             case 256:
                 if (settings->input_type != INPUT_NONE)
                 {
-                    fprintf(stderr, "Input type has been specified multiple times\n");
+                    fprintf(stderr, "Input type has been specified multiple "
+                        "times\n");
                     exit(EXIT_FAILURE);
                 }
                 settings->input_type = INPUT_STDIN;
@@ -63,7 +66,8 @@ void options(int argc, char *argv[], ga_settings *settings)
             case 257:
                 if (settings->input_type != INPUT_NONE)
                 {
-                    fprintf(stderr, "Input type has been specified multiple times\n");
+                    fprintf(stderr, "Input type has been specified multiple "
+                        "times\n");
                     exit(EXIT_FAILURE);
                 }
                 settings->input_type = INPUT_FILE;
@@ -74,7 +78,8 @@ void options(int argc, char *argv[], ga_settings *settings)
             case 'p':
                 if (settings->input_type != INPUT_NONE)
                 {
-                    fprintf(stderr, "Input type has been specified multiple times\n");
+                    fprintf(stderr, "Input type has been specified multiple "
+                        "times\n");
                     exit(EXIT_FAILURE);
                 }
                 settings->input_type = INPUT_NETWORK;
@@ -95,6 +100,23 @@ void options(int argc, char *argv[], ga_settings *settings)
 
             case 'g':
                 settings->loops = atoi(optarg);
+                break;
+
+            case 'e':
+                if (strcmp(optarg, "vlba") == 0 || strcmp(optarg, "VLBA") == 0)
+                {
+                    settings->encoding = ENC_VLBA;
+                }
+                else if (strcmp(optarg, "at") == 0 ||
+                    strcmp(optarg, "AT") == 0)
+                {
+                    settings->encoding = ENC_AT;
+                }
+                else
+                {
+                    fprintf(stderr, "Encoding must be one of: vlba, at\n");
+                    exit(EXIT_FAILURE);
+                }
                 break;
 
             case 'c':
@@ -144,12 +166,14 @@ void options(int argc, char *argv[], ga_settings *settings)
     }
 
     // Ensure spc, batch_size and resolution are all specified
-    if (settings->spc != 0 && settings->batch_size != 0 && settings->resolution != 0)
+    if (settings->spc != 0 && settings->batch_size != 0 &&
+        settings->resolution != 0)
     {
         // If all three are specified, but incorrectly
         if (settings->spc != (settings->resolution)*(settings->batch_size))
         {
-            fprintf(stderr, "Samples per channel != resolution * batch size\n");
+            fprintf(stderr, "Samples per channel != resolution * batch "
+                "size\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -170,7 +194,8 @@ void options(int argc, char *argv[], ga_settings *settings)
     }
 
     // If one or more is still equal to zero
-    if (settings->spc == 0 || settings->batch_size == 0 || settings->resolution == 0)
+    if (settings->spc == 0 || settings->batch_size == 0 ||
+        settings->resolution == 0)
     {
         fprintf(stderr, "Must specify at least two of options -a, -b, -r\n");
         exit(EXIT_FAILURE);
@@ -179,16 +204,18 @@ void options(int argc, char *argv[], ga_settings *settings)
     // Ensure spc > batch_size and resolution
     if (settings->spc < settings->batch_size)
     {
-        fprintf(stderr, "Samples per channel must be greater than batch size\n");
+        fprintf(stderr, "Samples per channel must be greater than batch "
+            "size\n");
         exit(EXIT_FAILURE);
     }
     else if (settings->spc < settings->resolution)
     {
-        fprintf(stderr, "Samples per channel must be greater than output resolution\n");
+        fprintf(stderr, "Samples per channel must be greater than output "
+            "resolution\n");
         exit(EXIT_FAILURE);
     }
 
-    // TODO: Hardcoded for now, will probably have to exctract from header
+    // TODO: If not specified, make sure they're determined from the header
     settings->bps = 2;
     // settings->channels = 8; (specified with -c for the moment)
     // Calculate some other useful variables (requires the above variables)

@@ -47,7 +47,7 @@ void convert_module(ga_settings *settings, cl_vars *cl, cl_mem dev_input,
     local_work_size[0] = nt;
 
     // Create the LUT according to the encoding scheme
-    if ( 1 ) // TODO: Assumes VLBA for the moment
+    if (settings->bps == 2 && settings->encoding == ENC_VLBA)
     {
         // 2-bit VLBA
         lut[0] = -HI_MAG;
@@ -55,13 +55,18 @@ void convert_module(ga_settings *settings, cl_vars *cl, cl_mem dev_input,
         lut[2] = -1.0;
         lut[3] = HI_MAG;
     }
-    else
+    else if (settings->bps == 2 && settings->encoding == ENC_AT)
     {
         // 2-bit AT
         lut[0] = 1.0;
         lut[1] = -1.0;
         lut[2] = HI_MAG;
         lut[3] = -HI_MAG;
+    }
+    else
+    {
+        fprintf(stderr, "Unknown encoding\n");
+        exit(EXIT_FAILURE);
     }
 
     // Set kernel arguments
