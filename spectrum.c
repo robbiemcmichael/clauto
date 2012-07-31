@@ -28,9 +28,8 @@ void spectrum_initialise(cl_vars *cl)
 void zero_spectrum(ga_settings *settings, cl_vars *cl, cl_mem dev_spectrum)
 {
     cl_int      err_ret;
-
-    size_t  global_work_size[1];
-    size_t  local_work_size[1];
+    size_t      global_work_size[1];
+    size_t      local_work_size[1];
 
     // Set work size
     int nt = MIN(settings->output_length, cl->max_work_size);
@@ -38,7 +37,7 @@ void zero_spectrum(ga_settings *settings, cl_vars *cl, cl_mem dev_spectrum)
     local_work_size[0] = nt;
 
     // Set kernel arguments
-    err_ret = clSetKernelArg(*zero_kernel, 0, sizeof(cl_mem),
+    err_ret = clSetKernelArg(*zero_kernel, 0, sizeof(dev_spectrum),
         (void *)&dev_spectrum);
     check_error(__FILE__, __LINE__, err_ret);
 
@@ -62,9 +61,9 @@ void add_spectrum(ga_settings *settings, cl_vars *cl, cl_mem dev_a,
     local_work_size[0] = nt;
 
     // Set kernel arguments
-    err_ret = clSetKernelArg(*add_kernel, 0, sizeof(cl_mem), (void *)&dev_a);
+    err_ret = clSetKernelArg(*add_kernel, 0, sizeof(dev_a), (void *)&dev_a);
     check_error(__FILE__, __LINE__, err_ret);
-    err_ret = clSetKernelArg(*add_kernel, 1, sizeof(cl_mem), (void *)&dev_b);
+    err_ret = clSetKernelArg(*add_kernel, 1, sizeof(dev_b), (void *)&dev_b);
     check_error(__FILE__, __LINE__, err_ret);
 
     // Execute kernel

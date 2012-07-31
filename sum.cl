@@ -8,8 +8,8 @@ __kernel void magnitude(__global float2 *spectra)
         spectra[idx].y*spectra[idx].y);
 }
 
-__kernel void sum(__global float2 *spectra, int channels, int spc, int dim,
-    int b)
+__kernel void sum(__global float2 *spectra, __const int channels,
+    __const int spc, __const int dim, __const int b)
 {
     int idx = get_global_id(0);
     int p = ((idx/dim)^b)*dim + idx % dim;
@@ -22,7 +22,7 @@ __kernel void sum(__global float2 *spectra, int channels, int spc, int dim,
 }
 
 __kernel void reorder(__global const float2 *summed, __global float2 *spec,
-    int spc, int dim)
+    __const int spc, __const int dim)
 {
     int idx = get_global_id(0);
     int p = (idx/dim)*spc + idx % dim;

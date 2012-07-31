@@ -31,11 +31,12 @@ void options(int argc, char *argv[], ga_settings *settings)
             {"batchsize", required_argument, NULL, 'b'},
             {"resolution", required_argument, NULL, 'r'},
             {"loops", required_argument, NULL, 'g'},
+            {"channels", required_argument, NULL, 'c'},
             {NULL, 0, NULL, 0}
         };
 
         int option_index = 0;
-        c = getopt_long(argc, argv, "d:p:a:b:r:g:", long_options, &option_index);
+        c = getopt_long(argc, argv, "d:p:a:b:r:g:c:", long_options, &option_index);
 
         // No more options, exit the loop
         if (c == -1)
@@ -94,6 +95,10 @@ void options(int argc, char *argv[], ga_settings *settings)
 
             case 'g':
                 settings->loops = atoi(optarg);
+                break;
+
+            case 'c':
+                settings->channels = atoi(optarg);
                 break;
 
             case '?':
@@ -185,7 +190,7 @@ void options(int argc, char *argv[], ga_settings *settings)
 
     // TODO: Hardcoded for now, will probably have to exctract from header
     settings->bps = 2;
-    settings->channels = 4;
+    // settings->channels = 8; (specified with -c for the moment)
     // Calculate some other useful variables (requires the above variables)
     settings->n = (settings->spc)*(settings->channels);
     settings->bytes = (settings->n)*(settings->bps)/8;
