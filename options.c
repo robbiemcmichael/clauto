@@ -29,7 +29,7 @@ void options(int argc, char *argv[], ga_settings *settings)
             {"port", required_argument, NULL, 'p'},
             {"spc", required_argument, NULL, 'a'},
             {"batchsize", required_argument, NULL, 'b'},
-            {"resolution", required_argument, NULL, 'r'},
+            {"bins", required_argument, NULL, 'n'},
             {"loops", required_argument, NULL, 'g'},
             {"encoding", required_argument, NULL, 'e'},
             {"channels", required_argument, NULL, 'c'},
@@ -94,8 +94,8 @@ void options(int argc, char *argv[], ga_settings *settings)
                 settings->batch_size = 1 << atoi(optarg);
                 break;
 
-            case 'r':
-                settings->resolution = 1 << atoi(optarg);
+            case 'n':
+                settings->bins = 1 << atoi(optarg);
                 break;
 
             case 'g':
@@ -165,53 +165,50 @@ void options(int argc, char *argv[], ga_settings *settings)
         settings->input_type = INPUT_STDIN;
     }
 
-    // Ensure spc, batch_size and resolution are all specified
-    if (settings->spc != 0 && settings->batch_size != 0 &&
-        settings->resolution != 0)
+    // Ensure spc, batch_size and bins are all specified
+    if (settings->spc != 0 && settings->batch_size != 0 && settings->bins != 0)
     {
         // If all three are specified, but incorrectly
-        if (settings->spc != (settings->resolution)*(settings->batch_size))
+        if (settings->spc != (settings->bins)*(settings->batch_size))
         {
-            fprintf(stderr, "Samples per channel != resolution * batch "
-                "size\n");
+            fprintf(stderr, "Samples per channel != bins * batch size\n");
             exit(EXIT_FAILURE);
         }
     }
     else if (settings->spc == 0)
     {
         // Determine the number of samples per channel
-        settings->spc = (settings->resolution)*(settings->batch_size);
+        settings->spc = (settings->bins)*(settings->batch_size);
     }
     else if (settings->batch_size == 0)
     {
         // Determine the batch size
-        settings->batch_size = (settings->spc)/(settings->resolution);
+        settings->batch_size = (settings->spc)/(settings->bins);
     }
-    else if (settings->resolution == 0)
+    else if (settings->bins == 0)
     {
-        // Determine the output resolution
-        settings->resolution = (settings->spc)/(settings->batch_size);
+        // Determine the number of FFT bins
+        settings->bins = (settings->spc)/(settings->batch_size);
     }
 
     // If one or more is still equal to zero
-    if (settings->spc == 0 || settings->batch_size == 0 ||
-        settings->resolution == 0)
+    if (settings->spc == 0 || settings->batch_size == 0 || settings->bins == 0)
     {
-        fprintf(stderr, "Must specify at least two of options -a, -b, -r\n");
+        fprintf(stderr, "Must specify at least two of options: -a, -b, -n\n");
         exit(EXIT_FAILURE);
     }
 
-    // Ensure spc > batch_size and resolution
+    // Ensure spc > batch_size and bins
     if (settings->spc < settings->batch_size)
     {
         fprintf(stderr, "Samples per channel must be greater than batch "
             "size\n");
         exit(EXIT_FAILURE);
     }
-    else if (settings->spc < settings->resolution)
+    else if (settings->spc < settings->bins)
     {
-        fprintf(stderr, "Samples per channel must be greater than output "
-            "resolution\n");
+        fprintf(stderr, "Samples per channel must be greater than the number "
+            "of FFT bins\n");
         exit(EXIT_FAILURE);
     }
 
@@ -221,5 +218,5 @@ void options(int argc, char *argv[], ga_settings *settings)
     // Calculate some other useful variables (requires the above variables)
     settings->n = (settings->spc)*(settings->channels);
     settings->bytes = (settings->n)*(settings->bps)/8;
-    settings->output_length = (settings->n)/(settings->batch_size);
+    settings->output_length = (settings->bins)/(settings->channels);
 }

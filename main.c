@@ -151,12 +151,12 @@ int main(int argc, char *argv[])
     // Print the result
     for (int i = 0; i < settings->output_length; i++)
     {
-        if (i % settings->resolution == 0)
+        if (i % settings->bins == 0)
         {
             printf("\n");
         }
 
-        if (i/(settings->resolution/2) % 2 == 0)
+        if (i/(settings->bins/2) % 2 == 0)
         {
             float *elem = (float *)(&host_output[i]);
             printf("%f\n", *elem);

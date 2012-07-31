@@ -80,8 +80,8 @@ void sum_module(ga_settings *settings, cl_vars *cl, cl_mem dev_data,
         err_ret = clSetKernelArg(*kernel, 2, sizeof(settings->spc),
             (void *)&settings->spc);
         check_error(__FILE__, __LINE__, err_ret);
-        err_ret = clSetKernelArg(*kernel, 3, sizeof(settings->resolution),
-            (void *)&settings->resolution);
+        err_ret = clSetKernelArg(*kernel, 3, sizeof(settings->bins),
+            (void *)&settings->bins);
         check_error(__FILE__, __LINE__, err_ret);
         err_ret = clSetKernelArg(*kernel, 4, sizeof(b), (void *)&b);
         check_error(__FILE__, __LINE__, err_ret);
@@ -113,8 +113,8 @@ void sum_module(ga_settings *settings, cl_vars *cl, cl_mem dev_data,
     err_ret = clSetKernelArg(*reorder_kernel, 2, sizeof(settings->spc),
         (void *)&settings->spc);
     check_error(__FILE__, __LINE__, err_ret);
-    err_ret = clSetKernelArg(*reorder_kernel, 3, sizeof(settings->resolution),
-        (void *)&settings->resolution);
+    err_ret = clSetKernelArg(*reorder_kernel, 3, sizeof(settings->bins),
+        (void *)&settings->bins);
 
     // Execute kernel
     err_ret = clEnqueueNDRangeKernel(cl->queue, *reorder_kernel, 1, NULL,

@@ -18,7 +18,7 @@ void fft_initialise(ga_settings *settings, cl_vars *cl)
     cl_int      err_ret;
 
     // Set the FFT dimension
-    clFFT_Dim3  dim = {settings->resolution, 1, 1};
+    clFFT_Dim3  dim = {settings->bins, 1, 1};
 
     // Create FFT plan
     plan = clFFT_CreatePlan(cl->context, dim, clFFT_1D, 

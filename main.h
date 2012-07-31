@@ -22,6 +22,6 @@ typedef struct
     int     channels;       // Number of channels
     int     bytes;          // Number of bytes
     int     batch_size;     // FFT batch size
-    int     resolution;     // Output resolution per channel
+    int     bins;           // Number of FFT bins
     int     output_length;  // Total output length
 } ga_settings;
