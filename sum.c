@@ -25,12 +25,10 @@ void sum_initialise(cl_vars *cl)
     cl_create_kernel(cl, program, sum_kernel, "sum");
     reorder_kernel = malloc(sizeof(cl_kernel));
     cl_create_kernel(cl, program, reorder_kernel, "reorder");
-
-    // Initialise output to zero
 }
 
 void sum_module(ga_settings *settings, cl_vars *cl, cl_mem dev_data,
-    cl_mem dev_output)
+    cl_mem dev_spectrum)
 {
     cl_int      err_ret;
     cl_kernel   *kernel;
@@ -107,8 +105,8 @@ void sum_module(ga_settings *settings, cl_vars *cl, cl_mem dev_data,
     err_ret = clSetKernelArg(*reorder_kernel, 0, sizeof(dev_data),
         (void *)&dev_data);
     check_error(__FILE__, __LINE__, err_ret);
-    err_ret = clSetKernelArg(*reorder_kernel, 1, sizeof(dev_output),
-        (void *)&dev_output);
+    err_ret = clSetKernelArg(*reorder_kernel, 1, sizeof(dev_spectrum),
+        (void *)&dev_spectrum);
     check_error(__FILE__, __LINE__, err_ret);
     err_ret = clSetKernelArg(*reorder_kernel, 2, sizeof(settings->spc),
         (void *)&settings->spc);

@@ -37,7 +37,7 @@ void options(int argc, char *argv[], ga_settings *settings)
         };
 
         int option_index = 0;
-        c = getopt_long(argc, argv, "d:p:a:b:r:g:e:c:", long_options,
+        c = getopt_long(argc, argv, "d:p:a:b:n:g:e:c:", long_options,
             &option_index);
 
         // No more options, exit the loop
@@ -218,5 +218,5 @@ void options(int argc, char *argv[], ga_settings *settings)
     // Calculate some other useful variables (requires the above variables)
     settings->n = (settings->spc)*(settings->channels);
     settings->bytes = (settings->n)*(settings->bps)/8;
-    settings->output_length = (settings->bins)/(settings->channels);
+    settings->output_length = (settings->bins)*(settings->channels);
 }

@@ -139,6 +139,7 @@ int main(int argc, char *argv[])
 
     // TODO: This will be moved into an if statement in the loop
     add_spectrum(settings, cl, dev_spectrum, dev_output);
+    zero_spectrum(settings, cl, dev_spectrum);
 
     // Copy result back to host
     err_ret = clEnqueueReadBuffer(cl->queue, dev_output, CL_TRUE, 0,
