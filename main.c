@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 #include <time.h>
 #include <CL/opencl.h>
 
@@ -13,14 +14,38 @@
 #include "sum.h"
 #include "spectrum.h"
 
-#define TIMER_DIV (CLOCKS_PER_SEC/1000)
+void timer_start(struct timeval *t_start)
+{
+    gettimeofday(t_start, NULL);
+}
+
+void timer_stop(struct timeval t_start, char *str, double *acc)
+{
+    double time;
+    struct timeval t_stop;
+
+    gettimeofday(&t_stop, NULL);
+    time += (double)(t_stop.tv_sec - t_start.tv_sec) +
+        (double)(t_stop.tv_usec - t_start.tv_usec)/1000000;
+
+    if (acc != NULL)
+    {
+        *acc += time;
+    }
+
+    if (str != NULL)
+    {
+        fprintf(stderr, "%s%.6lf\n", str, time);
+    }
+}
 
 int main(int argc, char *argv[])
 {
     cl_int      err_ret;
 
-    // TODO: temporary timers
-    clock_t t_start = clock();
+    // Create the first timer
+    struct timeval t_init;
+    timer_start(&t_init);
 
     // Process the command-line options
     ga_settings *settings = malloc(sizeof(ga_settings));
@@ -64,19 +89,20 @@ int main(int argc, char *argv[])
     zero_spectrum(settings, cl, dev_spectrum);
     zero_spectrum(settings, cl, dev_output);
 
-    // TODO: temporary timers
-    fprintf(stderr, "Initialisation overhead = %f\n\n", (float)(clock() - t_start)/TIMER_DIV);
+    // Print the initialisation overhead time
+    fprintf(stderr, "\n");
+    timer_stop(t_init, "-- Initialisation overhead: ", NULL);
 
-    float t_module[5] = {0};
-    clock_t t_loop;
-    clock_t start;
-    clock_t stop;
+    // Create the timers and accumulators for each module
+    double t_module[5] = {0};
+    struct timeval t_loop;
+    struct timeval t_start;
+    timer_start(&t_loop);
 
-    t_loop = clock();
     int loops = 0;
     for (int p = 0; p < settings->loops || settings->loops == 0; p++)
     {
-        start = clock();
+        timer_start(&t_start);
 
         // Read in the data
         int r_bytes = read_data(settings, host_input, settings->bytes);
@@ -84,17 +110,15 @@ int main(int argc, char *argv[])
         if (r_bytes != settings->bytes)
         {
             // Number of bytes read does not match number of bytes required
-            fprintf(stderr, "Unable to read %d bytes (only read %d bytes)\n\n",
+            fprintf(stderr, "Unable to read %d bytes (only read %d bytes)\n",
                 settings->bytes, r_bytes);
 
             // Indicates EOF (with some data unused), break out of main loop
             break;
         }
 
-        clFinish(cl->queue);
-        stop = clock();
-        t_module[0] += (float)(stop - start)/TIMER_DIV;
-        start = clock();
+        timer_stop(t_start, NULL, &t_module[0]);
+        timer_start(&t_start);
 
         // Transfer input data to device
         err_ret = clEnqueueWriteBuffer(cl->queue, dev_input, CL_TRUE, 0,
@@ -102,43 +126,40 @@ int main(int argc, char *argv[])
         check_error(__FILE__, __LINE__, err_ret);
 
         clFinish(cl->queue);
-        stop = clock();
-        t_module[1] += (float)(stop - start)/TIMER_DIV;
-        start = clock();
+        timer_stop(t_start, NULL, &t_module[1]);
+        timer_start(&t_start);
 
         // Execute convert module
         convert_module(settings, cl, dev_input, dev_data);
 
         clFinish(cl->queue);
-        stop = clock();
-        t_module[2] += (float)(stop - start)/TIMER_DIV;
-        start = clock();
+        timer_stop(t_start, NULL, &t_module[2]);
+        timer_start(&t_start);
 
         // Execute FFT module
         fft_module(settings, cl, dev_data);
 
         clFinish(cl->queue);
-        stop = clock();
-        t_module[3] += (float)(stop - start)/TIMER_DIV;
-        start = clock();
+        timer_stop(t_start, NULL, &t_module[3]);
+        timer_start(&t_start);
 
         // Execute the sum module
         sum_module(settings, cl, dev_data, dev_spectrum);
 
         clFinish(cl->queue);
-        stop = clock();
-        t_module[4] += (float)(stop - start)/TIMER_DIV;
+        timer_stop(t_start, NULL, &t_module[4]);
 
         loops++;
     }
 
+    // Print the loop timing information
     fprintf(stderr, "-- Timing information for %d loops:\n", loops);
-    fprintf(stderr, "Read = %f\n", t_module[0]);
-    fprintf(stderr, "Transfer = %f\n", t_module[1]);
-    fprintf(stderr, "Convert = %f\n", t_module[2]);
-    fprintf(stderr, "FFT = %f\n", t_module[3]);
-    fprintf(stderr, "Sum = %f\n", t_module[4]);
-    fprintf(stderr, "-- Loop total = %f\n\n", (float)(clock() - t_loop)/TIMER_DIV);
+    fprintf(stderr, "--     Read:\t%.6lf\n", t_module[0]);
+    fprintf(stderr, "--     H->D:\t%.6lf\n", t_module[1]);
+    fprintf(stderr, "--     Convert:\t%.6lf\n", t_module[2]);
+    fprintf(stderr, "--     FFT:\t%.6lf\n", t_module[3]);
+    fprintf(stderr, "--     Sum:\t%.6lf\n", t_module[4]);
+    timer_stop(t_loop, "-- Total loop time: ", NULL);
 
     // TODO: This will be moved into an if statement in the loop
     add_spectrum(settings, cl, dev_spectrum, dev_output);
@@ -176,8 +197,8 @@ int main(int argc, char *argv[])
     free(host_input);
     free(host_output);
 
-    // TODO: temporary timers
-    fprintf(stderr, "Total execution time = %f\n\n", (float)(clock() - t_start)/TIMER_DIV);
+    // Print the total execution time
+    timer_stop(t_init, "-- Total execution time: ", NULL);
 
     return 0;
 }

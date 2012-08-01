@@ -41,7 +41,6 @@ void cl_initialise(cl_vars *cl)
         platform_version, NULL);
     check_error(__FILE__, __LINE__, err_ret);
     fprintf(stderr, "CL_PLATFORM_VERSION = %s\n", platform_version);
-    fprintf(stderr, "\n");
 
     // Retrieve a list of devices
     err_ret = clGetDeviceIDs(cl->platform, CL_DEVICE_TYPE_GPU, 0, NULL,
@@ -64,7 +63,6 @@ void cl_initialise(cl_vars *cl)
         check_error(__FILE__, __LINE__, err_ret);
         fprintf(stderr, "[Device %d] CL_DEVICE_NAME = %s\n", i, device_name);
     }
-    fprintf(stderr, "\n");
 
     // If the device was unspecified exit after listing available devices
     if (cl->device_id == -1)
@@ -80,7 +78,7 @@ void cl_initialise(cl_vars *cl)
     fprintf(stderr, "CL_DEVICE_MAX_WORK_GROUP_SIZE = %d\n", cl->max_work_size);
 
     // Create a context 
-    cl->context = clCreateContext(NULL, cl->n_devices, cl->devices, NULL,
+    cl->context = clCreateContext(NULL, 1, &cl->devices[cl->device_id], NULL,
         NULL, &err_ret);
     check_error(__FILE__, __LINE__, err_ret);
 
