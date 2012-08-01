@@ -218,5 +218,5 @@ void options(int argc, char *argv[], ga_settings *settings)
     // Calculate some other useful variables (requires the above variables)
     settings->n = (settings->spc)*(settings->channels);
     settings->bytes = (settings->n)*(settings->bps)/8;
-    settings->output_length = (settings->bins)*(settings->channels);
+    settings->output_length = (settings->bins)/2*(settings->channels);
 }

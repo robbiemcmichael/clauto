@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     // TODO: temporary timers
     fprintf(stderr, "Initialisation overhead = %f\n\n", (float)(clock() - t_start)/TIMER_DIV);
 
-    float t_module[7] = {0};
+    float t_module[5] = {0};
     clock_t t_loop;
     clock_t start;
     clock_t stop;
@@ -91,6 +91,7 @@ int main(int argc, char *argv[])
             break;
         }
 
+        clFinish(cl->queue);
         stop = clock();
         t_module[0] += (float)(stop - start)/TIMER_DIV;
         start = clock();
@@ -100,6 +101,7 @@ int main(int argc, char *argv[])
             settings->bytes, host_input, 0, NULL, NULL);
         check_error(__FILE__, __LINE__, err_ret);
 
+        clFinish(cl->queue);
         stop = clock();
         t_module[1] += (float)(stop - start)/TIMER_DIV;
         start = clock();
@@ -107,6 +109,7 @@ int main(int argc, char *argv[])
         // Execute convert module
         convert_module(settings, cl, dev_input, dev_data);
 
+        clFinish(cl->queue);
         stop = clock();
         t_module[2] += (float)(stop - start)/TIMER_DIV;
         start = clock();
@@ -114,6 +117,7 @@ int main(int argc, char *argv[])
         // Execute FFT module
         fft_module(settings, cl, dev_data);
 
+        clFinish(cl->queue);
         stop = clock();
         t_module[3] += (float)(stop - start)/TIMER_DIV;
         start = clock();
@@ -121,20 +125,19 @@ int main(int argc, char *argv[])
         // Execute the sum module
         sum_module(settings, cl, dev_data, dev_spectrum);
 
+        clFinish(cl->queue);
         stop = clock();
         t_module[4] += (float)(stop - start)/TIMER_DIV;
-        start = clock();
 
-        // TODO: synchronisation issues?
-        clFinish(cl->queue);
         loops++;
     }
 
     fprintf(stderr, "-- Timing information for %d loops:\n", loops);
-    for (int i = 0; i < 5; i++)
-    {
-        fprintf(stderr, "t_module[%d] = %f\n", i, t_module[i]);
-    }
+    fprintf(stderr, "Read = %f\n", t_module[0]);
+    fprintf(stderr, "Transfer = %f\n", t_module[1]);
+    fprintf(stderr, "Convert = %f\n", t_module[2]);
+    fprintf(stderr, "FFT = %f\n", t_module[3]);
+    fprintf(stderr, "Sum = %f\n", t_module[4]);
     fprintf(stderr, "-- Loop total = %f\n\n", (float)(clock() - t_loop)/TIMER_DIV);
 
     // TODO: This will be moved into an if statement in the loop
@@ -152,16 +155,13 @@ int main(int argc, char *argv[])
     // Print the result
     for (int i = 0; i < settings->output_length; i++)
     {
-        if (i % settings->bins == 0)
+        if (i % (settings->bins/2) == 0)
         {
             printf("\n");
         }
 
-        if (i/(settings->bins/2) % 2 == 0)
-        {
-            float *elem = (float *)(&host_output[i]);
-            printf("%f\n", *elem);
-        }
+        float *elem = (float *)(&host_output[i]);
+        printf("%f\n", *elem);
     }
 
     // Release buffers
