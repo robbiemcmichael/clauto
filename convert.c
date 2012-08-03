@@ -76,10 +76,11 @@ void convert_module(ga_settings *settings, cl_vars *cl, cl_mem dev_input,
     err_ret = clSetKernelArg(*convert_kernel, 1, sizeof(dev_data),
         (void *)&dev_data);
     check_error(__FILE__, __LINE__, err_ret);
-    err_ret = clSetKernelArg(*convert_kernel, 2, sizeof(lut),
-        (void *)&lut);
+    err_ret = clSetKernelArg(*convert_kernel, 2, nt*sizeof(cl_int), NULL);
     check_error(__FILE__, __LINE__, err_ret);
-    err_ret = clSetKernelArg(*convert_kernel, 3, sizeof(settings->spc),
+    err_ret = clSetKernelArg(*convert_kernel, 3, sizeof(lut), (void *)&lut);
+    check_error(__FILE__, __LINE__, err_ret);
+    err_ret = clSetKernelArg(*convert_kernel, 4, sizeof(settings->spc),
         (void *)&settings->spc);
     check_error(__FILE__, __LINE__, err_ret);
 
