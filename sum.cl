@@ -1,32 +1,20 @@
-__kernel void magnitude(__global float2 *spectra)
+__kernel void sum(__global const float2 *data,__global float2 *spectrum,
+    __const int batch_size, __const int spc, __const int bins)
 {
     int idx = get_global_id(0);
+    int a = (idx/(bins/2))*spc + idx%(bins/2);
 
-    spectra[idx].x = sqrt(spectra[idx].x*spectra[idx].x +
-        spectra[idx].y*spectra[idx].y);
-}
-
-__kernel void sum(__global float2 *spectra, __const int channels,
-    __const int spc, __const int dim, __const int b)
-{
-    int idx = get_global_id(0);
-    int a = (idx/(dim/2))*dim + idx % (dim/2);
-    int p = ((a/dim)^b)*dim + a % dim;
-
-    for (int c = 0; c < channels; c++)
+    float x = 0;
+    float y = 0;
+    for (int s = 0; s < batch_size; s++)
     {
-        spectra[c*spc + a].x += spectra[c*spc + p].x;
-        spectra[c*spc + a].y += spectra[c*spc + p].y;
+        int d = a + s*bins;
+
+        // TODO: Should be able to calculate cross polarisations here
+        x += sqrt(data[d].x*data[d].x + data[d].y*data[d].y);
+        y += 0;
     }
-}
 
-__kernel void reorder(__global const float2 *summed, __global float2 *spec,
-    __const int spc, __const int dim)
-{
-    int idx = get_global_id(0);
-    int a = (idx/(dim/2))*dim + idx % (dim/2);
-    int p = (a/dim)*spc + a % dim;
-
-    spec[idx].x += summed[p].x;
-    spec[idx].y += summed[p].y;
+    spectrum[idx].x += x;
+    spectrum[idx].y += y;
 }
